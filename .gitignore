@@ -1,0 +1,6 @@
+# Environment variables (API keys)
+.env
+
+# Binary executable
+*.exe
+ai-chatbot
