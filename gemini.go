@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -14,16 +15,18 @@ type Part struct {
 	Text string `json:"text"`
 }
 
-// Content represents a single turn in the conversation
-// Role is either "user" or "model"
+// Content represents a single turn in the conversation or a system instruction.
+// Role is either "user" or "model" (omitted for system instructions).
 type Content struct {
-	Role  string `json:"role"`
+	Role  string `json:"role,omitempty"`
 	Parts []Part `json:"parts"`
 }
 
-// GeminiRequest matches the JSON payload Gemini expects
+// GeminiRequest matches the JSON payload Gemini expects.
+// SystemInstruction guides the model's persona, tone, and constraints throughout the conversation.
 type GeminiRequest struct {
-	Contents []Content `json:"contents"`
+	SystemInstruction *Content  `json:"system_instruction,omitempty"`
+	Contents          []Content `json:"contents"`
 }
 
 // Candidate represents one possible response returned by Gemini
@@ -40,13 +43,20 @@ type GeminiResponse struct {
 	} `json:"error,omitempty"`
 }
 
-// CallGemini sends the conversation history to the Gemini API and returns the AI's reply text
-func CallGemini(apiKey string, history []Content) (string, error) {
+// CallGemini sends the conversation history and optional system prompt to the Gemini API and returns the AI's reply text
+func CallGemini(apiKey string, systemPrompt string, history []Content) (string, error) {
 	// We use gemini-2.5-flash for fast and smart responses
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=%s", apiKey)
 
 	reqBody := GeminiRequest{
 		Contents: history,
+	}
+
+	// If a persona or system prompt is set, attach it as system_instruction
+	if strings.TrimSpace(systemPrompt) != "" {
+		reqBody.SystemInstruction = &Content{
+			Parts: []Part{{Text: systemPrompt}},
+		}
 	}
 
 	// 1. Convert Go struct into JSON bytes

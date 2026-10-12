@@ -3,62 +3,564 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Go + Gemini AI Chatbot</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- Google Fonts for sleek typography -->
+  <title>ChromaFuse AI — Dual-Image Creative Style Fusion Studio</title>
+  
+  <!-- Modern Inter & Outfit fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Highlight.js & Marked.js for AI Assistant Notes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
+  <!-- Studio Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
-<body>
-  <div class="chat-container">
-    <!-- Header -->
-    <header class="chat-header">
-      <div class="header-info">
-        <div class="status-indicator"></div>
-        <div>
-          <h2>Go Gemini Assistant</h2>
-          <span class="subtitle">Fast, Lightweight Go Backend</span>
-        </div>
+<body class="dark-theme">
+  <!-- Top Navigation Bar -->
+  <header class="studio-nav">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="12" r="6" stroke="url(#brandGrad1)" stroke-width="2.5"/>
+          <circle cx="15" cy="12" r="6" stroke="url(#brandGrad2)" stroke-width="2.5" opacity="0.85"/>
+          <defs>
+            <linearGradient id="brandGrad1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#a855f7"/>
+            </linearGradient>
+            <linearGradient id="brandGrad2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#3b82f6"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
-      <button id="clear-btn" title="Clear conversation">Clear</button>
-    </header>
-
-    <!-- Message List -->
-    <main id="chat-messages" class="chat-messages">
-      <div class="message bot-message">
-        <div class="avatar">🤖</div>
-        <div class="bubble">
-          Hello! I am your AI assistant powered by <strong>Go</strong> and <strong>Google Gemini</strong>. How can I help you today?
-        </div>
-      </div>
-    </main>
-
-    <!-- Typing Indicator -->
-    <div id="typing-indicator" class="typing-indicator hidden">
-      <div class="avatar">🤖</div>
-      <div class="bubble typing-bubble">
-        <span></span><span></span><span></span>
+      <div class="brand-text">
+        <span class="brand-title">ChromaFuse<span class="badge-ai">AI</span></span>
+        <span class="brand-subtitle">Dual-Image Creative Style Fusion Studio</span>
       </div>
     </div>
 
-    <!-- Input Form -->
-    <form id="chat-form" class="chat-input-area">
-      <input
-        type="text"
+    <div class="nav-actions">
+      <!-- Quick Demo Samples -->
+      <div class="demo-pills">
+        <span class="demo-label">Quick Demos:</span>
+        <button type="button" class="demo-btn" id="demo-cyberpunk" title="Load Cyberpunk Portrait Demo">
+          🌆 Cyberpunk
+        </button>
+        <button type="button" class="demo-btn" id="demo-renaissance" title="Load Renaissance Oil Demo">
+          🎨 Renaissance
+        </button>
+        <button type="button" class="demo-btn" id="demo-ghibli" title="Load Ghibli Anime Demo">
+          ☁️ Ghibli
+        </button>
+        <button type="button" class="demo-btn demo-btn-accent" id="demo-cat-hat" title="Generate AI Image: A cute cat wearing a hat (ag/gemini-3.1-flash-image)">
+          🐱 Cat in Hat (AI Gen)
+        </button>
+      </div>
+
+      <!-- Credits Pill -->
+      <div class="credits-badge" id="credits-badge">
+        <span class="gem-icon">💎</span>
+        <span id="credit-count">5</span> Free Credits
+      </div>
+
+      <!-- Pro Upgrade CTA -->
+      <button class="btn-pro" id="btn-open-pricing">
+        ⚡ Upgrade to Pro
+      </button>
+
+      <!-- Toggle Creative Director Drawer -->
+      <button class="btn-icon-nav" id="btn-toggle-assistant" title="Open AI Creative Director Chat">
+        <span class="nav-chat-icon">💬</span>
+        <span class="btn-text">Art Director</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Studio Workspace -->
+  <main class="studio-main">
+    <div class="studio-grid">
+      <!-- LEFT WORKSPACE: Input Studio & Configuration -->
+      <section class="studio-config-panel">
+        
+        <!-- SECTION 1: Dual Image Dropzones -->
+        <div class="panel-section">
+          <div class="section-header">
+            <span class="step-badge">STEP 1</span>
+            <h3>Dual Image Conditioning</h3>
+            <p class="section-desc">Upload your primary subject and reference style/texture to synthesize.</p>
+          </div>
+
+          <div class="dual-dropzones">
+            <!-- DROPZONE A: Subject / Content -->
+            <div class="dropzone-card" id="card-image-a">
+              <div class="card-header">
+                <div>
+                  <span class="slot-tag">01. Primary Subject</span>
+                  <span class="slot-role">Content & Silhouette</span>
+                </div>
+                <button type="button" class="btn-quick-ai" id="btn-ai-gen-subject" title="Generate Subject with AI prompt">
+                  ✨ AI Prompt
+                </button>
+              </div>
+              
+              <div class="drop-area" id="drop-area-a" tabindex="0">
+                <input type="file" id="file-input-a" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+                <div class="drop-empty" id="drop-empty-a">
+                  <div class="upload-icon-wrapper">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <rect x="3" y="3" width="18" height="18" rx="4" ry="4"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                  <p class="drop-prompt"><strong>Click to upload</strong> or drag & drop</p>
+                  <span class="drop-sub">Portrait, car, product, pet, or landscape</span>
+                </div>
+
+                <div class="drop-preview hidden" id="drop-preview-a">
+                  <img id="preview-img-a" alt="Subject Preview" />
+                  <div class="preview-overlay">
+                    <span class="img-meta" id="meta-a">Subject Ready</span>
+                    <button type="button" class="btn-remove-img" id="btn-remove-a" title="Remove Subject">✕</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- FUSION CORE ICON -->
+            <div class="fusion-link-core" title="Creative Fusion Engine">
+              <div class="pulse-ring"></div>
+              <span class="core-glyph">⚡</span>
+            </div>
+
+            <!-- DROPZONE B: Style / Texture -->
+            <div class="dropzone-card" id="card-image-b">
+              <div class="card-header">
+                <span class="slot-tag">02. Style & Texture</span>
+                <span class="slot-role">Palette & Atmosphere</span>
+              </div>
+              
+              <div class="drop-area" id="drop-area-b" tabindex="0">
+                <input type="file" id="file-input-b" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+                <div class="drop-empty" id="drop-empty-b">
+                  <div class="upload-icon-wrapper">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                  </div>
+                  <p class="drop-prompt"><strong>Click to upload</strong> or drag & drop</p>
+                  <span class="drop-sub">Oil painting, neon scene, watercolor, or pattern</span>
+                </div>
+
+                <div class="drop-preview hidden" id="drop-preview-b">
+                  <img id="preview-img-b" alt="Style Preview" />
+                  <div class="preview-overlay">
+                    <span class="img-meta" id="meta-b">Style Ready</span>
+                    <button type="button" class="btn-remove-img" id="btn-remove-b" title="Remove Style">✕</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Aesthetic Direction (Optional) -->
+        <div class="panel-section">
+          <div class="section-header">
+            <span class="step-badge">STEP 2</span>
+            <h3>Aesthetic Direction <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: normal;">(Optional)</span></h3>
+            <p class="section-desc">Default is <strong>Original / Auto</strong> (extracts style directly from your uploaded images). Or choose an artistic booster below.</p>
+          </div>
+
+          <div class="presets-carousel" id="presets-carousel">
+            <!-- Default Auto Preset -->
+            <div class="preset-card active" data-preset="auto">
+              <div class="preset-emoji">🎯</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Original / Auto</span>
+                  <span class="preset-tag">Authentic</span>
+                </div>
+                <p class="preset-desc">100% faithful reference transfer. Extracts style &amp; palette directly from uploaded images.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="cyberpunk">
+              <div class="preset-emoji">🌆</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Cyberpunk Neo-Tokyo</span>
+                  <span class="preset-tag">Sci-Fi</span>
+                </div>
+                <p class="preset-desc">Neon reflections, wet reflective pavement, deep cinematic contrast.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="renaissance">
+              <div class="preset-emoji">🎨</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Renaissance Oil</span>
+                  <span class="preset-tag">Fine Art</span>
+                </div>
+                <p class="preset-desc">Chiaroscuro lighting, rich impasto brushwork, warm Rembrandt glow.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="ghibli">
+              <div class="preset-emoji">☁️</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Studio Ghibli Anime</span>
+                  <span class="preset-tag">Anime</span>
+                </div>
+                <p class="preset-desc">Lush watercolor scenery, soft daylight, nostalgic cel animation aesthetic.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="surrealism">
+              <div class="preset-emoji">🌌</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Surrealist Dreamscape</span>
+                  <span class="preset-tag">Avant-Garde</span>
+                </div>
+                <p class="preset-desc">Dalí dream logic, impossible perspective, ethereal floating geometry.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="dark_fantasy">
+              <div class="preset-emoji">⚔️</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Dark Fantasy</span>
+                  <span class="preset-tag">Cinematic</span>
+                </div>
+                <p class="preset-desc">Moody Gothic mist, atmospheric rim light, epic concept art mood.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="pop_art">
+              <div class="preset-emoji">💥</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Vibrant Pop Art</span>
+                  <span class="preset-tag">Graphic</span>
+                </div>
+                <p class="preset-desc">Roy Lichtenstein Ben-Day dots, comic ink outlines, punchy primary colors.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="synthwave">
+              <div class="preset-emoji">🌴</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">80s Synthwave</span>
+                  <span class="preset-tag">Retro</span>
+                </div>
+                <p class="preset-desc">Magenta-cyan glowing horizon, wireframe grid, VHS scanline nostalgia.</p>
+              </div>
+            </div>
+
+            <div class="preset-card" data-preset="custom">
+              <div class="preset-emoji">✨</div>
+              <div class="preset-info">
+                <div class="preset-top">
+                  <span class="preset-title">Custom Creative</span>
+                  <span class="preset-tag">Bespoke</span>
+                </div>
+                <p class="preset-desc">Bespoke fusion directed strictly by your prompt and style reference.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Fine Tuning & Creative Directive -->
+        <div class="panel-section">
+          <div class="section-header">
+            <span class="step-badge">STEP 3</span>
+            <h3>Fine-Tuning & Prompt Modifiers</h3>
+          </div>
+
+          <div class="controls-row">
+            <!-- Style Blend Intensity Slider -->
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="intensity-slider">Style Fusion Intensity</label>
+                <span class="slider-val" id="intensity-val">65% (Harmonized)</span>
+              </div>
+              <input type="range" id="intensity-slider" min="20" max="95" value="65" class="slider-input" />
+              <div class="slider-ticks">
+                <span>Subtle (20%)</span>
+                <span>Balanced (65%)</span>
+                <span>Radical (95%)</span>
+              </div>
+            </div>
+
+            <!-- Custom Prompt Input -->
+            <div class="control-group">
+              <label for="custom-prompt">Tailored Art Direction (Optional)</label>
+              <div class="input-with-chips">
+                <input
+                  type="text"
+                  id="custom-prompt"
+                  placeholder="e.g. Add golden amber rim lighting, dramatic wet reflections, cinematic lens flare..."
+                />
+              </div>
+              <div class="quick-chips">
+                <button type="button" class="chip">✨ Golden Rim Light</button>
+                <button type="button" class="chip">🌧️ Rain & Reflections</button>
+                <button type="button" class="chip">🌫️ Atmospheric Fog</button>
+                <button type="button" class="chip">💎 Prismatic Lens Flare</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRIMARY ACTION BUTTONS -->
+          <div class="action-footer">
+            <button type="button" id="btn-generate" class="btn-synthesize">
+              <span class="btn-sparkle">⚡</span>
+              <span class="btn-label">Synthesize Style Fusion</span>
+              <span class="btn-subtext">(Dual Image • AI Diffusion)</span>
+            </button>
+            <button type="button" id="btn-prompt-generate" class="btn-text2img" title="Generate new image directly from prompt without uploading images">
+              <span class="btn-sparkle">🎨</span>
+              <span class="btn-label">Generate from Prompt</span>
+              <span class="btn-subtext">(Text-to-Image • Gemini 3.1)</span>
+            </button>
+            <button type="button" id="btn-reset-all" class="btn-secondary">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT WORKSPACE: Interactive Results Studio -->
+      <section class="studio-preview-panel">
+        <div class="preview-header">
+          <h3>Fusion Studio Canvas</h3>
+          <div class="canvas-tools" id="canvas-tools">
+            <div class="view-mode-toggle hidden" id="view-mode-toggle">
+              <button type="button" class="view-mode-btn active" data-mode="split" id="mode-split">⚡ Split Slider</button>
+              <button type="button" class="view-mode-btn" data-mode="side" id="mode-side">◫ Side-by-Side</button>
+            </div>
+            <button type="button" class="btn-canvas-action hidden" id="btn-download" title="Download High-Res Fused Artwork">
+              📥 Download
+            </button>
+            <button type="button" class="btn-canvas-action hidden" id="btn-copy-img" title="Copy Artwork to Clipboard">
+              📋 Copy
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-viewport" id="canvas-viewport">
+          
+          <!-- STATE 1: Empty Placeholder -->
+          <div class="canvas-empty" id="canvas-empty">
+            <div class="empty-graphic">
+              <div class="empty-ring ring-1"></div>
+              <div class="empty-ring ring-2"></div>
+              <div class="empty-center">🎨</div>
+            </div>
+            <h4>Ready to Fuse</h4>
+            <p>Upload a subject and style image on the left, or click one of the <strong>Quick Demos</strong> above to generate instantly.</p>
+          </div>
+
+          <!-- STATE 2: Generating Shimmer & Progress Visualizer -->
+          <div class="canvas-loading hidden" id="canvas-loading">
+            <div class="spinner-core">
+              <div class="loader-cube"></div>
+            </div>
+            <h4 id="loading-stage-title">Synthesizing Creative Style Fusion...</h4>
+            <p id="loading-stage-desc">Gemini Multimodal Vision is mapping subject contours and style palette...</p>
+            
+            <div class="progress-steps">
+              <div class="step-indicator active" id="prog-step-1">
+                <span class="dot"></span>
+                <span>Geometry Analysis</span>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-indicator" id="prog-step-2">
+                <span class="dot"></span>
+                <span>Palette & Texture</span>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-indicator" id="prog-step-3">
+                <span class="dot"></span>
+                <span>Latent Denoising</span>
+              </div>
+            </div>
+
+            <span class="elapsed-badge" id="elapsed-counter">Elapsed: 0s</span>
+          </div>
+
+          <!-- STATE 3: Interactive Split-Slider Viewer -->
+          <div class="canvas-result hidden" id="canvas-result">
+            <!-- Mode 1: Split Slider -->
+            <div class="split-slider-container" id="split-container">
+              <div class="split-img-wrapper base-img-wrap">
+                <img id="split-base-img" alt="Original Subject" draggable="false" />
+                <span class="split-label label-before">Subject (Original)</span>
+              </div>
+              <div class="split-img-wrapper fused-img-wrap" id="split-fused-wrap">
+                <img id="split-fused-img" alt="Fused Artwork" draggable="false" />
+                <span class="split-label label-after">Fused Artwork</span>
+              </div>
+              <div class="split-handle" id="split-handle">
+                <div class="handle-line"></div>
+                <div class="handle-knob">⇄</div>
+                <div class="handle-line"></div>
+              </div>
+            </div>
+
+            <!-- Mode 2: Side-by-Side Grid (toggled) -->
+            <div class="side-by-side-grid hidden" id="side-container">
+              <div class="side-card">
+                <span class="side-badge">Original Subject</span>
+                <img id="side-img-subject" alt="Subject" />
+              </div>
+              <div class="side-card">
+                <span class="side-badge">Style Reference</span>
+                <img id="side-img-style" alt="Style" />
+              </div>
+              <div class="side-card highlight-card">
+                <span class="side-badge-accent">✨ Fused Masterpiece</span>
+                <img id="side-img-fused" alt="Fused Result" />
+              </div>
+            </div>
+
+            <!-- Error Banner (if any) -->
+            <div class="error-banner hidden" id="error-banner"></div>
+
+            <!-- AI Creative Director Critique Card -->
+            <div class="critique-card" id="critique-card">
+              <div class="critique-header">
+                <span class="critique-icon">🤖</span>
+                <div class="critique-title-group">
+                  <h5>AI Creative Director Breakdown</h5>
+                  <span class="critique-meta" id="critique-meta">Preset: Cyberpunk • Denoised in 4.2s</span>
+                </div>
+              </div>
+              <div class="critique-content" id="critique-body">
+                The primary subject's contours were harmonized with the style reference's color palette, applying specular rim lighting and rich atmospheric texture.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- SLIDE-OVER DRAWER: AI Creative Director Assistant -->
+  <aside class="assistant-drawer hidden" id="assistant-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span class="drawer-avatar">🎨</span>
+        <div>
+          <h4>AI Creative Director</h4>
+          <span class="drawer-sub">Prompt Advice & Composition Coach</span>
+        </div>
+      </div>
+      <button class="btn-close-drawer" id="btn-close-drawer">✕</button>
+    </div>
+
+    <div class="drawer-messages" id="chat-messages">
+      <div class="message bot-message">
+        <div class="avatar">🎨</div>
+        <div class="message-body">
+          <div class="bubble">
+            Welcome to the Studio! I am your <strong>AI Creative Director</strong>. I can recommend prompt keywords, explain how to get cleaner style fusions, or critique your composition. How can I inspire you today?
+          </div>
+          <div class="message-meta">
+            <span class="message-time">Just now</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer Chat Input Form -->
+    <form class="drawer-input-form" id="chat-form">
+      <textarea
         id="user-input"
-        placeholder="Type a message... (Press Enter to send)"
-        autocomplete="off"
+        placeholder="Ask for prompting tips, lighting suggestions, or art advice..."
+        rows="1"
         required
-      />
-      <button type="submit" id="send-btn">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+      ></textarea>
+      <button type="submit" id="send-btn" title="Send message">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
         </svg>
       </button>
     </form>
+  </aside>
+
+  <!-- MODAL: Pro Upgrade / Pricing Modal (Demonstrating Monetization) -->
+  <div class="modal-backdrop hidden" id="pricing-modal">
+    <div class="modal-card">
+      <button class="btn-close-modal" id="btn-close-modal">✕</button>
+      
+      <div class="modal-header">
+        <span class="modal-tag">CHROMAFUSE PRO ACCESS</span>
+        <h3>Unlock Studio Commercial License</h3>
+        <p>Scale your image fusion workflows with unmetered speed and ultra-high resolution.</p>
+      </div>
+
+      <div class="pricing-tiers">
+        <div class="tier-card tier-free">
+          <div class="tier-name">Free Starter</div>
+          <div class="tier-price">$0 <span>/ month</span></div>
+          <p class="tier-sub">Great for testing</p>
+          <ul class="tier-perks">
+            <li>✓ 5 Free Monthly Generations</li>
+            <li>✓ Standard Resolution (1024×1024)</li>
+            <li>✓ Standard Generation Queue</li>
+            <li>✕ Watermark Removal</li>
+            <li>✕ Commercial Rights</li>
+          </ul>
+          <button class="btn-tier btn-tier-current" disabled>Current Tier</button>
+        </div>
+
+        <div class="tier-card tier-pro active-tier">
+          <div class="popular-ribbon">MOST POPULAR</div>
+          <div class="tier-name">Pro Creator</div>
+          <div class="tier-price">$19 <span>/ month</span></div>
+          <p class="tier-sub">For creators & e-commerce brands</p>
+          <ul class="tier-perks">
+            <li>✓ <strong>250 Generations</strong> / month</li>
+            <li>✓ <strong>Ultra HD 4K Upscale</strong></li>
+            <li>✓ <strong>No Watermarks</strong></li>
+            <li>✓ Full Commercial Rights</li>
+            <li>✓ Priority GPU Cloud Queue</li>
+          </ul>
+          <button class="btn-tier btn-tier-upgrade" id="btn-sim-checkout">Upgrade to Pro</button>
+        </div>
+
+        <div class="tier-card tier-studio">
+          <div class="tier-name">Studio Business</div>
+          <div class="tier-price">$49 <span>/ month</span></div>
+          <p class="tier-sub">For agencies & dev teams</p>
+          <ul class="tier-perks">
+            <li>✓ <strong>1,200 Generations</strong> / month</li>
+            <li>✓ <strong>Direct REST API Access</strong></li>
+            <li>✓ Batch Processing Pipeline</li>
+            <li>✓ Custom LoRA & Fine-Tuning</li>
+            <li>✓ 24/7 Dedicated Support</li>
+          </ul>
+          <button class="btn-tier btn-tier-secondary" id="btn-sim-studio">Contact Sales</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Studio Client Script -->
+  <script src="app.js?v=4"></script>
 </body>
 </html>
