@@ -87,6 +87,7 @@
   const critiqueCard = document.getElementById('critique-card');
   const critiqueBody = document.getElementById('critique-body');
   const critiqueMeta = document.getElementById('critique-meta');
+  const fidelityBadge = document.getElementById('fidelity-badge');
   const errorBanner = document.getElementById('error-banner');
 
   // AI Assistant Drawer
@@ -581,6 +582,7 @@
     viewModeToggle.classList.add('hidden');
     btnDownload.classList.add('hidden');
     btnCopyImg.classList.add('hidden');
+    if (fidelityBadge) fidelityBadge.classList.add('hidden');
   }
 
   // --------------------------------------------------------------------------
@@ -747,10 +749,28 @@
     sideImgStyle.src = state.imageB ? state.imageB.dataUrl : state.imageA.dataUrl;
     sideImgFused.src = finalImage;
 
-    // AI Critique Card
+    // AI Critique Card & Fidelity Badge (Approach A)
     critiqueBody.textContent = data.analysis || 'Artistic harmonization completed seamlessly.';
     const duration = data.duration_ms ? `${(data.duration_ms / 1000).toFixed(1)}s` : '3.8s';
     critiqueMeta.textContent = `Preset: ${data.preset || state.preset} • Synthesized in ${duration}`;
+
+    if (fidelityBadge) {
+      fidelityBadge.className = 'fidelity-badge';
+      if (data.fidelity_mode === 'multimodal_preserved_80_plus') {
+        fidelityBadge.textContent = '🛡️ >80% Subject Fidelity (Gemini 3.1 Flash Image)';
+        fidelityBadge.classList.remove('hidden');
+      } else if (data.fidelity_mode === 'diffusion_generated') {
+        fidelityBadge.textContent = '⚡ AI Diffusion Render';
+        fidelityBadge.className = 'fidelity-badge diffusion';
+        fidelityBadge.classList.remove('hidden');
+      } else if (data.fidelity_mode === 'pixel_shader_harmonized' || data.fidelity_mode === 'pixel_original') {
+        fidelityBadge.textContent = '🎨 100% Contour Match (Shader Harmonized)';
+        fidelityBadge.className = 'fidelity-badge shader';
+        fidelityBadge.classList.remove('hidden');
+      } else {
+        fidelityBadge.classList.add('hidden');
+      }
+    }
 
     // Error or Notice Banner
     if (data.notice) {

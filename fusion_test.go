@@ -131,3 +131,117 @@ func TestSynthesizeVisionPromptFallback(t *testing.T) {
 	}
 }
 
+func TestCallGeminiMultimodalImageGenValidation(t *testing.T) {
+	_, _, err := CallGeminiMultimodalImageGen("", "directive", "rawA", "image/png", "", "")
+	if err == nil {
+		t.Errorf("Expected error when API key is empty")
+	}
+
+	_, _, err = CallGeminiMultimodalImageGen("key", "directive", "", "image/png", "", "")
+	if err == nil {
+		t.Errorf("Expected error when subject image (rawA) is empty")
+	}
+}
+
+func TestCallGeminiMultimodalImageGenWithMockServer(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		var payload map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatalf("Failed to decode mock payload: %v", err)
+		}
+
+		contents, ok := payload["contents"].([]interface{})
+		if !ok || len(contents) == 0 {
+			t.Fatalf("Expected non-empty contents array")
+		}
+
+		genConfig, ok := payload["generationConfig"].(map[string]interface{})
+		if !ok {
+			t.Fatalf("Expected generationConfig in payload")
+		}
+		modalities, ok := genConfig["responseModalities"].([]interface{})
+		if !ok || len(modalities) == 0 || modalities[0] != "IMAGE" {
+			t.Errorf("Expected responseModalities to contain 'IMAGE'")
+		}
+
+		// Return simulated image in candidates parts
+		mockResp := map[string]interface{}{
+			"candidates": []map[string]interface{}{
+				{
+					"content": map[string]interface{}{
+						"parts": []map[string]interface{}{
+							{
+								"inline_data": map[string]interface{}{
+									"mime_type": "image/png",
+									"data":      "mockGeneratedImageBase64PNG",
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(mockResp)
+	}))
+	defer mockServer.Close()
+
+	imgResult, notice, err := CallGeminiMultimodalImageGen(
+		"test_key",
+		"Keep subject face intact and blend with style",
+		"rawSubjectBase64",
+		"image/png",
+		"rawStyleBase64",
+		"image/jpeg",
+		mockServer.URL,
+	)
+
+	if err != nil {
+		t.Fatalf("Unexpected error from CallGeminiMultimodalImageGen: %v", err)
+	}
+	if imgResult != "data:image/png;base64,mockGeneratedImageBase64PNG" {
+		t.Errorf("Expected data URI with mock base64, got %s", imgResult)
+	}
+	if notice != "" {
+		t.Errorf("Expected empty notice on successful generation, got %s", notice)
+	}
+}
+
+func TestCallGeminiMultimodalImageGen429Notice(t *testing.T) {
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mockResp := map[string]interface{}{
+			"error": map[string]interface{}{
+				"code":    429,
+				"message": "Resource exhausted",
+				"status":  "RESOURCE_EXHAUSTED",
+			},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(mockResp)
+	}))
+	defer mockServer.Close()
+
+	_, notice, err := CallGeminiMultimodalImageGen(
+		"test_key",
+		"directive",
+		"rawSubject",
+		"image/png",
+		"",
+		"",
+		mockServer.URL,
+	)
+
+	if err == nil {
+		t.Errorf("Expected error when all models return 429")
+	}
+	if !strings.Contains(notice, "Free Tier has a limit of 0") {
+		t.Errorf("Expected quota limit explanation notice, got %q", notice)
+	}
+}
+
+
